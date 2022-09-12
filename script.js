@@ -1,27 +1,47 @@
-document.querySelector('button').addEventListener('click', onSearch);
-function onSearch(){ 
-  let search = "";
-  search = document.getElementById('searchImg').value;
-  fetch('https://api.giphy.com/v1/gifs/search?api_key=5iLsO1eSCVx2skaCT3sxYAWc9l5XyTDc&q=' + search + '&limit=5&offset=0&rating=g&lang=en')
-  .then(response => response.json()) 
-  .then(data => {
+const input = document.getElementById('searchImg');
+
+
+let container = document.createElement('div');
+container.classList.add("container");
+
+input.addEventListener('input', onSearch);
+
+async function onSearch(){ 
+  
+  let search = input.value;
+  try{
     let dataArr = "";
+    container.innerHTML = "";
+
+    let response = await fetch('https://api.giphy.com/v1/gifs/search?api_key=5iLsO1eSCVx2skaCT3sxYAWc9l5XyTDc&q=' + search + '&limit=5&offset=0&rating=g&lang=en');
+    let data = await response.json();
     dataArr = data.data;
 
-    for(let img in dataArr){
-      console.log(dataArr);
-      let imgSrc = dataArr[img].url;
-      let container = "";
+    if (dataArr.length !== 0) {
+
+      for(let img of dataArr){
+        let imgSrc = img.images.downsized.url;
       
-      container = document.createElement('div');
+        img = document.createElement('img');
+        img.src = `${imgSrc}`;
+        img.alt = `${search}`;
+        container.append(img);
       
-      img = document.createElement('img');
-      img.src = `${imgSrc}`;
-      img.alt = `${search}`;
-      container.append(img);
-      
+      }
       document.body.append(container);
+    
+    } else if(dataArr.length === 0){ 
+      let errorMessage = document.createElement('p');
+      errorMessage.classList.add("error");
+      errorMessage.textContent = "Ничего не найдено"
+      container.append(errorMessage);
     }
-  })
-  .catch(error => console.log(error));
+    
+    
+  }
+  
+  catch(err){
+    alert(err);
+  }
+  
 }
